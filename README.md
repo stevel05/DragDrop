@@ -1,4 +1,4 @@
-# DragDrop
+# DragDrop - B4j
 javafx 8 Drag and Drop
 
 This library is an update to Andrews jDragandDrop to take advantage of the DragBorad.DragView available in JavaFX8. This allows displaying a graphic next to or behind the mouse cursor while dragging items.
