@@ -5,7 +5,7 @@ This library is an update to jDragandDrop to take advantage of the DragBorad.Dra
 
 It's not quite a drop in replacement, but I tried to make it as close as possible.
 
-The differences are:
+The differences are  :
 * The DragAndDrop class needs to be initialized with the Callback module.
 * The Transfer Mode does not support strings, it needs to be a TransferMode array, which are available as variables from the TransferMode static class.
 * The e.AcceptTransferMode call has changed to e.AcceptTransferModes.
