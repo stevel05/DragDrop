@@ -1,0 +1,37 @@
+	Sub DragTarget_DragEntered(e As DragEvent)
+		Log("DragEntered")
+	End Sub
+
+	Sub DragTarget_DragExited(e As DragEvent)
+		Log("DragExited")	
+	End Sub
+
+	Sub DragTarget_DragOver(e As DragEvent)
+		If e.GetDragboard.HasString Or e.GetDragboard.HasContent("B4JSource") Then e.AcceptTransferModes(TransferMode.COPY) 
+	End Sub
+
+	Sub DragTarget_DragDropped(e As DragEvent)
+'		For Each S As String In e.GetDataIds
+'			Log(S)
+'		Next
+			
+		Dim RequiredType As String = "B4JSource"
+		Dim Db As Dragboard = e.GetDragboard
+		If Db.HasContent(RequiredType) Then 
+			txtTarget.Text = Db.GetContent(RequiredType)
+			e.SetDropCompleted(True)
+			Return
+		End If
+		
+		If Db.HasString Then
+			txtTarget.Text = Db.GetString
+			e.SetDropCompleted(True)
+			Return
+		End If
+		' It's from outside so lets explore it
+		Dim ids  As List = e.GetDataIds
+		For i = 0 To ids.Size - 1
+			Log(i & " : " & ids.Get(i) & " : " & e.GetDataObjectForId(ids.Get(i)))
+		Next	
+		Log("text/uri-list" & " is " & e.GetDataObjectForId("text/uri-list"))
+	End Sub

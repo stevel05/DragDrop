@@ -1,0 +1,223 @@
+﻿AppType=JavaFX
+Build1=Default,com.stevel05.draganddrop
+File1=1.bjl
+File2=Eagle.jpg
+File3=NGC6503.jpg
+FileGroup1=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+Group=Default Group
+Library1=jcore
+Library2=jfx
+Library3=javaobject
+Module1=aaaIDELinks
+Module2=DragAndDrop
+Module3=Dragboard
+Module4=DragEvent
+Module5=TransferMode
+NumberOfFiles=3
+NumberOfLibraries=3
+NumberOfModules=5
+Version=10.2
+@EndOfDesignText@
+#Region Project Attributes 
+	#MainFormWidth: 600
+	#MainFormHeight: 400 
+#End Region
+'#LibraryAuthor: Steve Laming
+'#LibraryName: jDragAndDrop2
+'#LibraryVersion: 0.2
+'0.2 Added consume event to DragEvent
+
+'Open in vscode ide://run?file=C:\Users\Steve\AppData\Local\Programs\Microsoft+VS+Code\Code.exe&Args=%PROJECT%
+
+Sub Process_Globals
+	Private fx As JFX
+	Private MainForm As Form
+	Private DragDrop As DragAndDrop
+	Private DragDrop1 As DragAndDrop
+	Private txtSource As TextField
+	Private txtTarget As TextField
+	Private Images(2) As Image
+	Private ImageIndex As Int
+	Private ImgSource As ImageView
+	Private ImgTarget As ImageView
+End Sub
+
+'If you run two copies of this demo you will see that you can drag and drop between them
+Sub AppStart (Form1 As Form, Args() As String)
+	MainForm = Form1
+	MainForm.RootPane.LoadLayout("1") 'Load the layout file.
+	MainForm.Title = "Drag and Drop Demo"
+	MainForm.Show
+	DragDrop.Initialize(Me)
+	DragDrop1.Initialize(Me)
+	
+	Images(0).InitializeSample(File.DirAssets,"Eagle.jpg",160,160)
+	Images(1).InitializeSample(File.DirAssets,"NGC6503.jpg",160,160)
+	
+	ImgSource.SetImage(Images(0))
+	
+	'Make sure the ImgTarget has a size or it won't be available as a drop target
+	Dim Cnv As Canvas
+	Cnv.Initialize("")
+	Cnv.Width = 160
+	Cnv.Height = 160
+	Cnv.DrawRect(0,0,160,160,fx.Colors.Transparent,True,0)
+	ImgTarget.SetImage(Cnv.Snapshot)
+	
+	
+	DragDrop.MakeDragSource(txtSource, "txtSource")
+	DragDrop.MakeDragTarget(txtTarget, "txtTarget")	
+	
+	DragDrop1.MakeDragSource(ImgSource, "ImgSource")
+	DragDrop1.MakeDragTarget(ImgTarget, "ImgTarget")
+
+End Sub
+
+#Region Text Drag and Drop
+
+	Sub txtSource_DragDetected(e As MouseEvent)
+		DragDrop.SetDragModeAndData2(TransferMode.ANY, Array As String("B4JSource"), Array As Object(txtSource.text), txtSource.Snapshot) 
+		Log("DragDetected : Starting drag")
+	End Sub
+
+	Sub txtSource_DragDone(e As DragEvent)
+		Log("DragDone : transfer mode " & e.GetTransferMode & " completed") ' null if not successfull
+	txtSource.Text = "And again!"
+End Sub
+
+Sub txtTarget_DragEntered(e As DragEvent)
+	Log("DragEntered")
+End Sub
+
+Sub txtTarget_DragExited(e As DragEvent)
+	Log("DragExited")
+End Sub
+
+Sub txtTarget_DragOver(e As DragEvent)
+	If e.GetDragboard.HasString Or e.GetDragboard.HasContent("B4JSource") Then e.AcceptTransferModes(TransferMode.COPY)
+End Sub
+
+Sub txtTarget_DragDropped(e As DragEvent)
+'		For Each S As String In e.GetDataIds
+'			Log(S)
+'		Next
+			
+	Dim RequiredType As String = "B4JSource"
+	Dim Db As Dragboard = e.GetDragboard
+	If Db.HasContent(RequiredType) Then
+		txtTarget.Text = Db.GetContent(RequiredType)
+		e.SetDropCompleted(True)
+		Return
+	End If
+		
+	If Db.HasString Then
+		txtTarget.Text = Db.GetString
+		e.SetDropCompleted(True)
+		Return
+	End If
+	' It's from outside so lets explore it
+	Dim ids  As List = e.GetDataIds
+	For i = 0 To ids.Size - 1
+		Log(i & " : " & ids.Get(i) & " : " & e.GetDataObjectForId(ids.Get(i)))
+	Next
+	Log("text/uri-list" & " is " & e.GetDataObjectForId("text/uri-list"))
+End Sub
+
+#End Region Text Drag and Drop
+
+
+#Region Image Drag and Drop
+
+	Sub ImgSource_DragDetected(e As MouseEvent)
+
+		DragDrop1.SetDragModeAndData(TransferMode.ANY, Array As String(""), Array As Object(ImgSource.GetImage)) 
+
+		Log("DragDetected : Starting drag")
+	End Sub
+
+	Sub ImgSource_DragDone(e As DragEvent)
+		Log("DragDone : transfer mode " & e.GetTransferMode & " completed") ' null if not successfull
+		
+	End Sub
+
+	Sub ImgTarget_DragEntered(e As DragEvent)
+		Log("ImgTDragEntered")
+		
+	End Sub
+
+	Sub ImgTarget_DragExited(e As DragEvent)
+		Log("ImgTDragExited")	
+	End Sub
+
+	Sub ImgTarget_DragOver(e As DragEvent)
+		Log("DO")
+		If e.GetDragboard.HasImage Then 
+			e.AcceptTransferModes(TransferMode.COPY)
+			Return
+		End If
+		If e.GetDragboard.HasFiles Then
+			Log("HF")
+			Dim Found As Boolean = False
+			For Each F As String In e.GetDragboard.GetFiles
+				Log(F)
+				If F.EndsWith(".jpg") Then Found = True
+				If F.EndsWith(".png") Then Found = True
+			Next
+			If Found Then 
+				e.AcceptTransferModes(TransferMode.COPY)
+				Log("OK")
+				Return
+			End If
+		End If
+		If e.GetDragboard.HasUrl Then
+			Dim URL As String = e.GetDragboard.GetUrl
+			Dim Found As Boolean = False
+			If URL.EndsWith(".jpg") Or URL.Contains(".jpg?") Then Found = True
+			If URL.EndsWith(".png") Or URL.Contains(".png?") Then Found = True
+			If Found Then e.AcceptTransferModes(TransferMode.COPY)
+			Return
+		End If
+		
+	End Sub
+
+	Sub ImgTarget_DragDropped(e As DragEvent)
+		For Each S As String In e.GetDataIds
+			Log(S)
+		Next
+
+		Dim Db As Dragboard = e.GetDragboard
+		
+		If Db.HasImage Then
+			Dim Img As Image = Db.GetImage
+			'A Null image or an image with 0 height or width wll collapse the Image view and it won't be available as a drop target/
+			If Img <> Null And Img.Height > 0 And Img.Width > 0 Then 
+				ImgTarget.SetImage(Db.GetImage)
+				ImageIndex = (ImageIndex + 1) Mod 2
+				ImgSource.SetImage(Images(ImageIndex))
+			End If
+			e.SetDropCompleted(True)
+			Return
+		End If
+		
+		'Files Dropped from local PC
+		If Db.HasFiles Then
+			Dim FN As String = Db.GetFiles.Get(0)
+			Dim Img As Image
+			Img.Initialize("",FN)
+			If Img <> Null And Img.Height > 0 And Img.Width > 0 Then ImgTarget.SetImage(Img)
+			e.SetDropCompleted(True)
+			Return
+		End If
+		
+		'Images with a direct link dropped from internet, get the file with OKHTTP : https://www.b4x.com/android/forum/threads/okhttputils2.62105/
+		If Db.HasUrl Then
+			Log("URL Found " & Db.GetUrl)
+			e.SetDropCompleted(True)
+			Return
+		End If
+		e.SetDropCompleted(True)
+	End Sub
+
+#End Region Image Drag and Drop

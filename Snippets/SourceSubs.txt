@@ -1,0 +1,11 @@
+Sub DragSource_DragDetected(e As MouseEvent)
+
+	DragDrop1.SetDragModeAndData(TransferMode.ANY, Array As String(""), Array As Object(ImgSource.GetImage)) 
+
+	Log("DragDetected : Starting drag")
+End Sub
+
+Sub DragSource_DragDone(e As DragEvent)
+	Log("DragDone : transfer mode " & e.GetTransferMode & " completed") ' null if not successfull
+		
+End Sub

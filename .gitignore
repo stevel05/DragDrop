@@ -1,0 +1,10 @@
+**/Objects
+**/AutoBackups
+**/ModuleArchive
+**/PONOTES
+**/B4xLib
+*.meta
+*.zip
+*.mp4
+Manifest.txt
+aaaIDElinks.bas
